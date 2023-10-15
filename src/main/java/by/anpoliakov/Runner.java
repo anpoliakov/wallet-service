@@ -2,8 +2,9 @@ package by.anpoliakov;
 
 import by.anpoliakov.services.in.ConsoleHandler;
 
-/** @author anpoliakov
- *  Входная точка приложения
+/**
+ * @author anpoliakov
+ * Входная точка приложения
  * */
 public class Runner {
     public static void main(String[] args) {

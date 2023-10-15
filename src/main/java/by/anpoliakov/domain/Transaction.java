@@ -1,5 +1,7 @@
 package by.anpoliakov.domain;
 
+import java.util.Date;
+
 /**
  * Сущность представляет из себя снятие/пополнение баласа
  * хранит в себе все основные данные операции
@@ -7,11 +9,10 @@ package by.anpoliakov.domain;
 public class Transaction {
     private Double amount;
     private TypeOperation type;
-    private String date;
-    /** кто выполнял операцию*/
-    private Player relationToPlayer;
+    private Date date;
+    private Player relationToPlayer; //информация о игроке кто выполнял операцию
 
-    public Transaction(Double amount, TypeOperation type, String date, Player relationToPlayer) {
+    public Transaction(Double amount, TypeOperation type, Date date, Player relationToPlayer) {
         this.amount = amount;
         this.type = type;
         this.date = date;
@@ -22,32 +23,20 @@ public class Transaction {
         return amount;
     }
 
-    public void setAmount(Double amount) {
-        this.amount = amount;
-    }
-
     public TypeOperation getType() {
         return type;
     }
 
-    public void setType(TypeOperation type) {
-        this.type = type;
-    }
-
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 
     public Player getRelationToPlayer() {
         return relationToPlayer;
-    }
-
-    public void setRelationToPlayer(Player relationToPlayer) {
-        this.relationToPlayer = relationToPlayer;
     }
 
     @Override

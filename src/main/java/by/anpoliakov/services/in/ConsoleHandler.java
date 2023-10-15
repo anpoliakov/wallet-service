@@ -2,7 +2,7 @@ package by.anpoliakov.services.in;
 
 import by.anpoliakov.domain.Player;
 import by.anpoliakov.domainServices.PlayerRepository;
-import by.anpoliakov.infrastructure.ApplicationDataBase;
+import by.anpoliakov.infrastructure.PlayerDataBase;
 
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -14,7 +14,7 @@ public class ConsoleHandler {
     PlayerRepository dataBasePlayer = null;
 
     public ConsoleHandler() {
-        this.dataBasePlayer = ApplicationDataBase.getInstance();
+        this.dataBasePlayer = PlayerDataBase.getInstance();
     }
 
     /** Основное меню программы */
@@ -56,9 +56,10 @@ public class ConsoleHandler {
             }
 
         Player player = dataBasePlayer.getPlayerByLoginAndPassword(login, password);
-        if(player != null){
-            new LoginConsoleHandlerForPlayer(player);
-        }else {
+
+        try {
+            new ConsoleHandlerForLoginPlayer(player);
+        }catch (NullPointerException e){
             System.out.println("Данный пользователь не найден! Попробуйте ещё раз!");
             showLoginMenu();
         }
