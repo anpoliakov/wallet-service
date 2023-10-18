@@ -1,0 +1,14 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <changeSet id="insert-data-transactions" author="anpoliakov">
+        <insert tableName="transactions" schemaName="entities">
+            <column name="amount" value="125.5"/>
+            <column name="operation_id" value="1"/>
+            <column name="date" value="2023-10-17 22:05:06"/>
+            <column name="player_id" value="1"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
