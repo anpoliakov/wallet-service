@@ -11,10 +11,10 @@ import java.util.Scanner;
  * Класс для работы с пользовательским вводом в консоль
  * Основное меню, меню регистрации и авторизации - когда пользователь ещё не в системе! */
 public class ConsoleHandler {
-    PlayerRepository dataBasePlayer = null;
+    private PlayerRepository playerRepository = null;
 
     public ConsoleHandler() {
-        this.dataBasePlayer = PlayerDataBase.getInstance();
+        playerRepository = new PlayerDataBase();
     }
 
     /** Основное меню программы */
@@ -55,11 +55,10 @@ public class ConsoleHandler {
                 return;
             }
 
-        Player player = dataBasePlayer.getPlayerByLoginAndPassword(login, password);
-
-        try {
+        Player player = playerRepository.getPlayerByLoginAndPassword(login, password);
+        if(player != null){
             new ConsoleHandlerForLoginPlayer(player);
-        }catch (NullPointerException e){
+        }else {
             System.out.println("Данный пользователь не найден! Попробуйте ещё раз!");
             showLoginMenu();
         }
@@ -84,8 +83,8 @@ public class ConsoleHandler {
             return;
         }
 
-        if(!dataBasePlayer.existPlayerByLogin(login)){
-            dataBasePlayer.add(new Player(login, password));
+        if(!playerRepository.existPlayerByLogin(login)){
+            playerRepository.addPlayer(new Player(login, password));
             System.out.println("Вы успешно зарегистрированы! Можете войти под своей учётной записью.");
         }else {
             System.out.println("Пользователь " + login + " уже существует! Попробуйте ещё раз");

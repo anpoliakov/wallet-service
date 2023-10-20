@@ -17,14 +17,14 @@ public class PlayerDataBaseTest {
     @Test
     public void playerShouldBeAdded() {
         Player player = new Player("TestLogin", "TestPassword");
-        playerDataBase.add(player);
+        playerDataBase.addPlayer(player);
         assertTrue(playerDataBase.existPlayerByLogin("TestLogin"));
     }
 
     @Test
     public void methodShouldReturnPlayer() {
         Player player = new Player("TestLogin", "TestPassword");
-        playerDataBase.add(player);
+        playerDataBase.addPlayer(player);
         assertEquals(player, playerDataBase.getPlayerByLoginAndPassword("TestLogin", "TestPassword"));
     }
 }

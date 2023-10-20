@@ -1,5 +1,6 @@
 package by.anpoliakov;
 
+import by.anpoliakov.services.LiquibaseRunner;
 import by.anpoliakov.services.in.ConsoleHandler;
 
 /**
@@ -9,7 +10,8 @@ import by.anpoliakov.services.in.ConsoleHandler;
 public class Runner {
     public static void main(String[] args) {
         System.out.println("Добро пожаловать в iService!");
-        new ConsoleHandler().showMainMenu();
+            LiquibaseRunner.start();
+            new ConsoleHandler().showMainMenu();
         System.out.println("Приходи ещё!");
     }
 }

@@ -1,30 +1,23 @@
 package by.anpoliakov.services.in;
 
 import by.anpoliakov.domain.Player;
-import by.anpoliakov.domain.Transaction;
-import by.anpoliakov.domain.TypeOperation;
-import by.anpoliakov.infrastructure.TransactionDataBase;
+import by.anpoliakov.infrastructure.PlayerDataBase;
+import by.anpoliakov.services.LogicServiceLoginPlayer;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import static by.anpoliakov.services.LogicServiceLoginPlayer.getInputAmountCredit;
-import static by.anpoliakov.services.LogicServiceLoginPlayer.getInputAmountDebit;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 
 /** Класс для работы с вводом <u>aвторизированного</u> пользователя */
 public class ConsoleHandlerForLoginPlayer {
-    private final TransactionDataBase transactionDataBase;
-    private final Player player;
+    private LogicServiceLoginPlayer logicServiceLoginPlayer;
+    private PlayerDataBase playerDataBase;
+    private Player player;
 
-    public ConsoleHandlerForLoginPlayer(Player player) throws NullPointerException{
-        this.transactionDataBase = TransactionDataBase.getInstance();
+    public ConsoleHandlerForLoginPlayer(Player player){
+        this.logicServiceLoginPlayer = new LogicServiceLoginPlayer();
+        this.playerDataBase = new PlayerDataBase();
         this.player = player;
-
-        if(player != null){
-            showMainLoginMenu();
-        }else {
-            throw new NullPointerException("Был передан Player = null в конструктор класса ConsoleHandlerForLoginPlayer");
-        }
+        showMainLoginMenu();
     }
 
     /** Метод показа главного меню авторизированного пользователя */
@@ -32,6 +25,7 @@ public class ConsoleHandlerForLoginPlayer {
         int choice = -1;
 
         do{
+            player = playerDataBase.getPlayerByLoginAndPassword(player.getLogin(), player.getPassword());
             System.out.println("################ Меню игрока |" + player.getLogin() + "| ################");
             System.out.println("Текущий баланс = " + player.getBalance() + " бел.руб");
 
@@ -56,7 +50,7 @@ public class ConsoleHandlerForLoginPlayer {
         System.out.println("+++++++++++++++++++++++++++++++++++");
         System.out.println("Введите сумму пополнения: ");
 
-        if(getInputAmountCredit(player)){
+        if(logicServiceLoginPlayer.getInputAmountCredit(player)){
             System.out.println("-УСПЕХ ОПЕРАЦИИ ПОПОЛНЕНИЯ-");
         }
     }
@@ -65,7 +59,7 @@ public class ConsoleHandlerForLoginPlayer {
     private void debit() {
         System.out.println("-----------------------------------");
         System.out.println("Введите сумму которую желаете снять: ");
-        if(getInputAmountDebit(player)){
+        if(logicServiceLoginPlayer.getInputAmountDebit(player)){
             System.out.println("-УСПЕХ ОПЕРАЦИИ СНЯТИЯ-");
         }
 
@@ -74,15 +68,7 @@ public class ConsoleHandlerForLoginPlayer {
     /** Метод для показа всех транзакций текущего Player */
     private void getTransactionHistory() {
         System.out.println("---ИСТОРИЯ----ИСТОРИЯ-----ИСТОРИЯ----| ИГРОКА: " + player.getLogin() + "|---ИСТОРИЯ----ИСТОРИЯ-----ИСТОРИЯ----");
-        List<Transaction> transactions = transactionDataBase.getTransactionsPlayer(player);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-
-        for (Transaction transaction : transactions){
-            System.out.println("Сумма транзакции: " + transaction.getAmount()
-                    + "бел.руб, тип транзакции: " + transaction.getType()
-                    + ", время: " + dateFormat.format(transaction.getDate()));
-        }
-
+        logicServiceLoginPlayer.showHistoryTransaction(player);
         System.out.println("\nНажмите Enter что бы продолжить.....");
         new Scanner(System.in).nextLine();
     }

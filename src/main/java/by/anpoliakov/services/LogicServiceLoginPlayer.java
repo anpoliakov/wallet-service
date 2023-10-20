@@ -3,19 +3,28 @@ package by.anpoliakov.services;
 import by.anpoliakov.domain.Player;
 import by.anpoliakov.domain.Transaction;
 import by.anpoliakov.domain.TypeOperation;
+import by.anpoliakov.infrastructure.PlayerDataBase;
 import by.anpoliakov.infrastructure.TransactionDataBase;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 public class LogicServiceLoginPlayer {
-    private static TransactionDataBase transactionDataBase = TransactionDataBase.getInstance();
+    private TransactionDataBase transactionDataBase = null;
+    private PlayerDataBase playerDataBase = null;
 
-    public static boolean getInputAmountCredit(Player player){
+    public LogicServiceLoginPlayer() {
+        this.transactionDataBase = new TransactionDataBase();
+        this.playerDataBase = new PlayerDataBase();
+    }
+
+    public boolean getInputAmountCredit(Player player){
         Scanner scanner = new Scanner(System.in);
         boolean isSuccessful = false;
-        String idTransaction;
+        String transaction_uid;
         Double amount;
 
         try {
@@ -28,15 +37,17 @@ public class LogicServiceLoginPlayer {
 
                 do{
                     System.out.println("Введите уникальный индификатор транзакции:");
-                    idTransaction = scanner.nextLine().trim();
+                    transaction_uid = scanner.nextLine().trim();
 
-                    if(transactionDataBase.checkUniqueTransactionById(idTransaction)){
+                    if(transactionDataBase.checkUniqueTransactionById(transaction_uid)){
                         System.out.println("Данный индификатор транзакции - НЕ УНИКАЛЕН! Попробуйте ещё раз:");
                     }else {
-                        player.setBalance(player.getBalance() + amount);
-                        Transaction transaction = new Transaction(amount, TypeOperation.CREDIT, new Date(), player);
-                        transactionDataBase.addTransaction(idTransaction, transaction);
-                        player.addTransactionID(idTransaction);
+                        Double new_balance = player.getBalance() + amount;
+                        if(playerDataBase.updateBalancePlayer(player.getPlayer_id(), new_balance)){
+                            System.out.println("Успешно обнавленён - " + player.getLogin());
+                        }
+                        Transaction transaction = new Transaction(transaction_uid, amount, TypeOperation.CREDIT, player);
+                        transactionDataBase.addTransaction(transaction);
                         hasTransactionID = true;
                     }
                 }while (!hasTransactionID);
@@ -51,10 +62,10 @@ public class LogicServiceLoginPlayer {
     }
 
 
-    public static boolean getInputAmountDebit(Player player){
+    public boolean getInputAmountDebit(Player player){
         Scanner scanner = new Scanner(System.in);
         boolean isSuccessful = false;
-        String idTransaction;
+        String transaction_uid;
         Double amount;
 
         try {
@@ -63,27 +74,26 @@ public class LogicServiceLoginPlayer {
 
             if(amount != 0){
                 if(!(player.getBalance() - amount < 0)){
-                    boolean hasTransactionID = true;
+                    boolean has_transaction_uid = true;
 
                     do{
                         System.out.println("Введите уникальный индификатор транзакции:");
-                        idTransaction = scanner.nextLine().trim();
+                        transaction_uid = scanner.nextLine().trim();
 
                         /**
                          * Выполняем проверку ID транзакции - есть ли такая в БД + проверку не введён ли просто Enter
                          * */
-                        if(transactionDataBase.checkUniqueTransactionById(idTransaction) && !idTransaction.isEmpty()){
+                        if(transactionDataBase.checkUniqueTransactionById(transaction_uid) && !transaction_uid.isEmpty()){
                             System.out.println("Данный индификатор транзакции - НЕ УНИКАЛЕН! Попробуйте ещё раз:");
                         }else {
                             if(amount != 0){
-                                player.setBalance(player.getBalance() - amount);
-                                Transaction transaction = new Transaction(amount, TypeOperation.DEBIT, new Date(), player);
-                                transactionDataBase.addTransaction(idTransaction,transaction);
-                                player.addTransactionID(idTransaction);
+                                playerDataBase.updateBalancePlayer(player.getPlayer_id(), player.getBalance() - amount);
+                                Transaction transaction = new Transaction(transaction_uid, amount, TypeOperation.DEBIT, player);
+                                transactionDataBase.addTransaction(transaction);
                             }
-                            hasTransactionID = false;
+                            has_transaction_uid = false;
                         }
-                    }while (hasTransactionID);
+                    }while (has_transaction_uid);
                 }else {
                     System.out.println("ОШИБКА: Недостаточно денег для снятия. Ваш остаток на счёте = " + player.getBalance() + ", попробуйте ещё раз!");
                     getInputAmountDebit(player);
@@ -96,5 +106,16 @@ public class LogicServiceLoginPlayer {
         }
 
         return isSuccessful;
+    }
+
+    public void showHistoryTransaction(Player player){
+        List<Transaction> transactions = transactionDataBase.getTransactionsPlayer(player);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+
+        for (Transaction transaction : transactions){
+            System.out.println("Сумма транзакции: " + transaction.getAmount()
+                    + " бел.руб, тип транзакции: " + transaction.getTypeOperation()
+                    + ", время: " + dateFormat.format(transaction.getDate()));
+        }
     }
 }

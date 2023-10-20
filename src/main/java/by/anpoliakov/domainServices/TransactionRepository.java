@@ -9,6 +9,6 @@ import java.util.List;
  * @see Transaction */
 public interface TransactionRepository {
     List <Transaction> getTransactionsPlayer(Player player);
-    void addTransaction (String idTransaction, Transaction transaction);
+    void addTransaction (Transaction transaction);
     boolean checkUniqueTransactionById(String id);
 }

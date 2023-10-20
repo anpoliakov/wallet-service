@@ -5,6 +5,7 @@
 
     <changeSet id="insert-data-transactions" author="anpoliakov">
         <insert tableName="transactions" schemaName="entities">
+            <column name="transaction_uid" value="test123"/>
             <column name="amount" value="125.5"/>
             <column name="operation_id" value="1"/>
             <column name="date" value="2023-10-17 22:05:06"/>

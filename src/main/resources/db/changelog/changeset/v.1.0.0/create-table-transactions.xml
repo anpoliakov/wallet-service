@@ -6,8 +6,12 @@
 
     <changeSet id="create-table-transactions" author="anpoliakov">
         <createTable tableName="transactions" schemaName="entities">
-            <column name="transaction_id" type="BIGINT" autoIncrement="true">
+            <column name="transaction_id" type="BIGINT" autoIncrement="true" >
                 <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="transaction_uid" type="VARCHAR(30)">
+                <constraints nullable="false"/>
             </column>
 
             <column name="amount" type="NUMERIC">
@@ -31,7 +35,7 @@
                 baseColumnNames="player_id"
                 baseTableName="transactions"
                 constraintName="fk_transactions_players"
-                referencedColumnNames="players_id"
+                referencedColumnNames="player_id"
                 referencedTableName="players"
                 referencedTableSchemaName="entities"
                 baseTableSchemaName="entities"
