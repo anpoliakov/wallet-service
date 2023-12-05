@@ -102,8 +102,11 @@ public class ConsoleHandler {
         int choice = -1;
 
         try {
-            choice = scanner.nextInt();
-            scanner.nextLine();
+            if (scanner.hasNextLine()) {
+                choice = scanner.nextInt();
+                scanner.nextLine();
+                System.out.println("Был ввод-"+choice);
+            }
         }catch (NoSuchElementException e){
             choice = -1;
         }

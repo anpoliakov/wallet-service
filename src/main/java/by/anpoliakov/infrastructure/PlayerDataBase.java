@@ -3,8 +3,9 @@ package by.anpoliakov.infrastructure;
 import by.anpoliakov.domain.Player;
 import by.anpoliakov.domainServices.PlayerRepository;
 import by.anpoliakov.services.ConnectionManager;
-import by.anpoliakov.services.constants.SQLConstants;
+import by.anpoliakov.services.constants.ConstantsSQL;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,11 +22,10 @@ public  class PlayerDataBase implements PlayerRepository{
             connection = ConnectionManager.createConnection();
             connection.setAutoCommit(false);
 
-            pst = connection.prepareStatement (SQLConstants.CREATE_PLAYER);
-            //при создании нового игрока в БД для безопасности можно не передавать значение баланса - а устанавливать по default
-            pst.setDouble(1, player.getBalance());
+            pst = connection.prepareStatement (ConstantsSQL.CREATE_PLAYER);
+
+            pst.setBigDecimal(1, player.getBalance());
             pst.setString(2, player.getLogin());
-            //пароль желательно зашифровать хотя бы в md5 формате (не хранить голый в БД)
             pst.setString(3, player.getPassword());
 
             pst.executeUpdate();
@@ -53,7 +53,7 @@ public  class PlayerDataBase implements PlayerRepository{
         try {
             connection = ConnectionManager.createConnection();
 
-            pst = connection.prepareStatement (SQLConstants.HAS_PLAYER);
+            pst = connection.prepareStatement (ConstantsSQL.HAS_PLAYER);
             pst.setString(1, login);
             rs = pst.executeQuery();
             result = rs.next();
@@ -69,7 +69,7 @@ public  class PlayerDataBase implements PlayerRepository{
     }
 
     @Override
-    public boolean updateBalancePlayer(int player_id, Double newBalance) {
+    public boolean updateBalancePlayer(int player_id, BigDecimal newBalance) {
         Connection connection = null;
         PreparedStatement pst = null;
         boolean updated = false;
@@ -78,8 +78,8 @@ public  class PlayerDataBase implements PlayerRepository{
             connection = ConnectionManager.createConnection();
             connection.setAutoCommit(false);
 
-            pst = connection.prepareStatement(SQLConstants.UPDATE_PLAYER_BALANCE);
-            pst.setDouble(1, newBalance);
+            pst = connection.prepareStatement(ConstantsSQL.UPDATE_PLAYER_BALANCE);
+            pst.setBigDecimal(1, newBalance);
             pst.setInt(2, player_id);
 
             if(pst.executeUpdate() > 0){
@@ -113,14 +113,14 @@ public  class PlayerDataBase implements PlayerRepository{
         try {
             connection = ConnectionManager.createConnection();
 
-            pst = connection.prepareStatement(SQLConstants.SELECT_PLAYER);
+            pst = connection.prepareStatement(ConstantsSQL.SELECT_PLAYER);
             pst.setString(1, login);
             pst.setString(2, password);
             rs = pst.executeQuery();
 
             while (rs.next()){
-                int player_id = rs.getInt(SQLConstants.PLAYER_ID_LABEL);
-                double tempBalance = rs.getDouble(SQLConstants.BALANCE_LABEL);
+                int player_id = rs.getInt(ConstantsSQL.PLAYER_ID_LABEL);
+                BigDecimal tempBalance = rs.getBigDecimal(ConstantsSQL.BALANCE_LABEL);
                 player = new Player(player_id, tempBalance, login, password);
             }
 
@@ -136,20 +136,20 @@ public  class PlayerDataBase implements PlayerRepository{
     }
 
     @Override
-    public Double getBalancePlayer(int player_id) {
+    public BigDecimal getBalancePlayer(int player_id) {
         Connection connection = null;
         PreparedStatement pst = null;
         ResultSet rs = null;
-        Double balance = null;
+        BigDecimal balance = null;
 
         try {
             connection = ConnectionManager.createConnection();
-            pst = connection.prepareStatement(SQLConstants.SELECT_BALANCE);
+            pst = connection.prepareStatement(ConstantsSQL.SELECT_BALANCE);
             pst.setInt(1, player_id);
             rs = pst.executeQuery();
 
             while (rs.next()){
-                balance = rs.getDouble(SQLConstants.BALANCE_LABEL);
+                balance = rs.getBigDecimal(ConstantsSQL.BALANCE_LABEL);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -162,6 +162,9 @@ public  class PlayerDataBase implements PlayerRepository{
         return balance;
     }
 
+    /**
+     * Метод для отмены транзакции (общий)
+     * */
     private void rollBack(Connection connection, SQLException e){
         System.err.println("Произошла ошибка: " + e.getMessage());
         if (connection != null) {

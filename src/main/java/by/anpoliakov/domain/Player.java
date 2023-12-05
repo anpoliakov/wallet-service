@@ -1,20 +1,22 @@
 package by.anpoliakov.domain;
 
+import java.math.BigDecimal;
+
 /** Сущность представляющая из себя игрока: его баланс, логин и пароль */
 public class Player {
     private int player_id;
-    private Double balance;
+    private BigDecimal balance;
     private String login; // Уникальный индификатор
     private String password;
 
     // При начальной инициализации объекта - он пуст: нет денег, нет операций
     public Player(String login, String password) {
-        balance = 0.0;
+        balance = new BigDecimal("0.0");
         this.login = login;
         this.password = password;
     }
 
-    public Player(int player_id, double balance, String login, String password) {
+    public Player(int player_id, BigDecimal balance, String login, String password) {
         this.player_id = player_id;
         this.balance = balance;
         this.login = login;
@@ -31,11 +33,11 @@ public class Player {
         this.player_id = player_id;
     }
 
-    public Double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(Double balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
 

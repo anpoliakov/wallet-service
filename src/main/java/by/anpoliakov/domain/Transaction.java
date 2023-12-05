@@ -1,5 +1,6 @@
 package by.anpoliakov.domain;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -9,31 +10,31 @@ import java.util.Date;
 public class Transaction {
     private int transaction_id;
     private String transaction_uid;
-    private Double amount;
-    private TypeOperation typeOperation;
+    private BigDecimal amount;
+    private TypeOperation type_operation;
     private Date date;
     private Player relationToPlayer; //информация о игроке кто выполнял операцию
 
-    public Transaction(Double amount, TypeOperation typeOperation, Date date, Player relationToPlayer) {
+    public Transaction(BigDecimal amount, TypeOperation type_operation, Date date, Player relationToPlayer) {
         this.amount = amount;
-        this.typeOperation = typeOperation;
+        this.type_operation = type_operation;
         this.date = date;
         this.relationToPlayer = relationToPlayer;
     }
 
-    public Transaction(String transaction_uid, Double amount, TypeOperation type_operation, Player player) {
+    public Transaction(String transaction_uid, BigDecimal amount, TypeOperation type_operation, Player player) {
         this.transaction_uid = transaction_uid;
         this.amount = amount;
-        this.typeOperation = type_operation;
+        this.type_operation = type_operation;
         this.date = new Date();
         this.relationToPlayer = player;
     }
 
-    public Transaction(int transaction_id, String transaction_uid, Double amount, String name_operation, java.sql.Date date, Player player) {
+    public Transaction(int transaction_id, String transaction_uid, BigDecimal amount, TypeOperation type_operation, Date date, Player player) {
         this.transaction_id = transaction_id;
         this.transaction_uid = transaction_uid;
         this.amount = amount;
-        this.typeOperation = TypeOperation.valueOf(name_operation);
+        this.type_operation = type_operation;
         this.date = date;
         this.relationToPlayer = player;
     }
@@ -54,12 +55,12 @@ public class Transaction {
         this.transaction_uid = transaction_uid;
     }
 
-    public Double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public TypeOperation getTypeOperation() {
-        return typeOperation;
+    public TypeOperation getType_operation() {
+        return type_operation;
     }
 
     public Date getDate() {
@@ -78,7 +79,7 @@ public class Transaction {
     public String toString() {
         return "Transaction{" +
                 "amount=" + amount +
-                ", type=" + typeOperation +
+                ", type=" + type_operation +
                 ", date=" + date +
                 ", relationToPlayer=" + relationToPlayer +
                 '}';

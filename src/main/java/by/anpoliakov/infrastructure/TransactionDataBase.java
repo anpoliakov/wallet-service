@@ -2,18 +2,19 @@ package by.anpoliakov.infrastructure;
 
 import by.anpoliakov.domain.Player;
 import by.anpoliakov.domain.Transaction;
+import by.anpoliakov.domain.TypeOperation;
 import by.anpoliakov.domainServices.TransactionRepository;
 import by.anpoliakov.services.ConnectionManager;
 import by.anpoliakov.services.constants.Constants;
-import by.anpoliakov.services.constants.SQLConstants;
+import by.anpoliakov.services.constants.ConstantsSQL;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-/**
- * Класс по управлению сущностью Transaction в БД
- * */
+/** Класс по управлению сущностью Transaction в БД */
 public class TransactionDataBase implements TransactionRepository {
 
     /** Метод получения списка транзакций переданного в параметры Player */
@@ -27,16 +28,16 @@ public class TransactionDataBase implements TransactionRepository {
 
         try {
             connection = ConnectionManager.createConnection();
-            pst = connection.prepareStatement(SQLConstants.SELECT_ALL_TRANSACTIONS_BY_PLAYER);
+            pst = connection.prepareStatement(ConstantsSQL.SELECT_ALL_TRANSACTIONS_BY_PLAYER);
             pst.setInt(1, player.getPlayer_id());
 
             rs = pst.executeQuery();
             while (rs.next()){
-                int transaction_id = rs.getInt(SQLConstants.TRANSACTION_ID_LABEL);
-                String transaction_uid = rs.getString(SQLConstants.TRANSACTION_UID_LABEL);
-                Double amount = rs.getDouble(SQLConstants.AMOUNT_LABEL);
-                String name_operation = rs.getString(SQLConstants.NAME_OPERATION_LABEL);
-                Date date = rs.getDate(SQLConstants.DATE);
+                int transaction_id = rs.getInt(ConstantsSQL.TRANSACTION_ID_LABEL);
+                String transaction_uid = rs.getString(ConstantsSQL.TRANSACTION_UID_LABEL);
+                BigDecimal amount = rs.getBigDecimal(ConstantsSQL.AMOUNT_LABEL);
+                TypeOperation name_operation = TypeOperation.valueOf(rs.getString(ConstantsSQL.NAME_OPERATION_LABEL));
+                Date date = new Date(rs.getTimestamp(ConstantsSQL.DATE).getTime());
 
                 listTransactions.add(new Transaction(transaction_id, transaction_uid, amount, name_operation, date, player));
             }
@@ -57,12 +58,12 @@ public class TransactionDataBase implements TransactionRepository {
 
         try {
             connection = ConnectionManager.createConnection();
-            pst = connection.prepareStatement(SQLConstants.INSERT_TRANSACTION);
+            pst = connection.prepareStatement(ConstantsSQL.INSERT_TRANSACTION);
 
             pst.setString(1, transaction.getTransaction_uid());
-            pst.setDouble(2, transaction.getAmount());
-            pst.setInt(3, transaction.getTypeOperation().ordinal( ) + Constants.CORRECT_VALUE_ENUM_FOR_DATABASE);
-            pst.setDate(4, java.sql.Date.valueOf(transaction.getDate().toString()));
+            pst.setBigDecimal(2, transaction.getAmount());
+            pst.setInt(3, transaction.getType_operation().ordinal( ) + Constants.CORRECT_VALUE_ENUM_FOR_DATABASE);
+            pst.setTimestamp(4, new Timestamp(transaction.getDate().getTime()));
             pst.setInt(5, transaction.getRelationToPlayer().getPlayer_id());
 
             pst.executeUpdate();
@@ -84,7 +85,7 @@ public class TransactionDataBase implements TransactionRepository {
 
         try {
             connection = ConnectionManager.createConnection();
-            pst = connection.prepareStatement(SQLConstants.IS_UNIQUE_TRANSACTION_UID);
+            pst = connection.prepareStatement(ConstantsSQL.IS_UNIQUE_TRANSACTION_UID);
             pst.setString(1, transaction_uid);
 
             rs = pst.executeQuery();

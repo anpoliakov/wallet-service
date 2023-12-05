@@ -1,6 +1,6 @@
 package by.anpoliakov;
 
-import by.anpoliakov.services.LiquibaseRunner;
+import by.anpoliakov.services.PreparerTablesAndSchemesDataBase;
 import by.anpoliakov.services.in.ConsoleHandler;
 
 /**
@@ -10,8 +10,11 @@ import by.anpoliakov.services.in.ConsoleHandler;
 public class Runner {
     public static void main(String[] args) {
         System.out.println("Добро пожаловать в iService!");
-            LiquibaseRunner.start();
-            new ConsoleHandler().showMainMenu();
+
+        PreparerTablesAndSchemesDataBase.prepare();
+        new ConsoleHandler().showMainMenu();
+
         System.out.println("Приходи ещё!");
+
     }
 }

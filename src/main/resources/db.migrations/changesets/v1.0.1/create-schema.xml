@@ -6,7 +6,7 @@
 
     <changeSet id="createSchema" author="anpoliakov">
         <sql>
-            CREATE SCHEMA entities;
+            CREATE SCHEMA IF NOT EXISTS entities;  
         </sql>
     </changeSet>
 

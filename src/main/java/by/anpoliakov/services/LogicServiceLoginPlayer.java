@@ -6,8 +6,8 @@ import by.anpoliakov.domain.TypeOperation;
 import by.anpoliakov.infrastructure.PlayerDataBase;
 import by.anpoliakov.infrastructure.TransactionDataBase;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
@@ -22,17 +22,19 @@ public class LogicServiceLoginPlayer {
     }
 
     public boolean getInputAmountCredit(Player player){
-        Scanner scanner = new Scanner(System.in);
         boolean isSuccessful = false;
+        Scanner scanner = new Scanner(System.in);
+
         String transaction_uid;
-        Double amount;
+        BigDecimal compareValue = new BigDecimal(0);
+        BigDecimal amount;
 
         try {
-            //принимаем ввод от пользователя
-            amount = scanner.nextDouble();
-            scanner.nextLine();
+            String input = scanner.nextLine().trim();
+            amount = new BigDecimal(input);
 
-            if(amount != 0){
+            /* если введённое число НЕ меньше и НЕ равно 0, проваливаемся дальше */
+            if(!(amount.compareTo(compareValue) <= 0)){
                 boolean hasTransactionID = false;
 
                 do{
@@ -42,39 +44,51 @@ public class LogicServiceLoginPlayer {
                     if(transactionDataBase.checkUniqueTransactionById(transaction_uid)){
                         System.out.println("Данный индификатор транзакции - НЕ УНИКАЛЕН! Попробуйте ещё раз:");
                     }else {
-                        Double new_balance = player.getBalance() + amount;
-                        if(playerDataBase.updateBalancePlayer(player.getPlayer_id(), new_balance)){
-                            System.out.println("Успешно обнавленён - " + player.getLogin());
-                        }
-                        Transaction transaction = new Transaction(transaction_uid, amount, TypeOperation.CREDIT, player);
-                        transactionDataBase.addTransaction(transaction);
+                        BigDecimal currentBalance = player.getBalance();
+                        BigDecimal balanceAfterCredit = currentBalance.add(amount);
+
+                        playerDataBase.updateBalancePlayer(player.getPlayer_id(), balanceAfterCredit);
+                        transactionDataBase.addTransaction(new Transaction(transaction_uid, amount, TypeOperation.CREDIT, player));
                         hasTransactionID = true;
                     }
                 }while (!hasTransactionID);
             }
 
         }catch (InputMismatchException e){
-            System.out.println("Ввод только чисел, в качестве разделителя вещественного числа - запятая. Попробуйте ещё");
+            System.out.println("Ввод только чисел, в качестве разделителя вещественного числа - точка. Попробуйте ещё");
             isSuccessful = getInputAmountCredit(player);
+        }catch (NumberFormatException e){
+            System.out.println("Не верный формат ввода значения debit суммы, попробуйте ещё раз!");
+            isSuccessful = getInputAmountDebit(player);
         }
 
         return isSuccessful;
     }
 
-
+    /** Метод снятия денег с баланса
+     * @param player - игрок, с баланса коготоро производим списание средств
+     * @return успех/неудача операции
+     * */
     public boolean getInputAmountDebit(Player player){
-        Scanner scanner = new Scanner(System.in);
         boolean isSuccessful = false;
+        Scanner scanner = new Scanner(System.in);
+
         String transaction_uid;
-        Double amount;
+        BigDecimal compareValue = new BigDecimal(0);
+        BigDecimal amount;
+
 
         try {
-            amount = scanner.nextDouble();
-            scanner.nextLine();
+            String input = scanner.nextLine().trim();
+            amount = new BigDecimal(input);
 
-            if(amount != 0){
-                if(!(player.getBalance() - amount < 0)){
-                    boolean has_transaction_uid = true;
+            /* если введённое число НЕ меньше и НЕ равно 0, проваливаемся дальше */
+            if(!(amount.compareTo(compareValue) <= 0)){
+                BigDecimal currentBalance = player.getBalance();
+                BigDecimal balanceAfterDebit = currentBalance.subtract(amount);
+
+                if(balanceAfterDebit.compareTo(compareValue) >= 0){
+                    boolean hasTransactionID = true;
 
                     do{
                         System.out.println("Введите уникальный индификатор транзакции:");
@@ -84,16 +98,13 @@ public class LogicServiceLoginPlayer {
                          * Выполняем проверку ID транзакции - есть ли такая в БД + проверку не введён ли просто Enter
                          * */
                         if(transactionDataBase.checkUniqueTransactionById(transaction_uid) && !transaction_uid.isEmpty()){
-                            System.out.println("Данный индификатор транзакции - НЕ УНИКАЛЕН! Попробуйте ещё раз:");
+                            System.out.println("Данный индификатор транзакции - НЕ УНИКАЛЕН или пустой! Попробуйте ещё раз:");
                         }else {
-                            if(amount != 0){
-                                playerDataBase.updateBalancePlayer(player.getPlayer_id(), player.getBalance() - amount);
-                                Transaction transaction = new Transaction(transaction_uid, amount, TypeOperation.DEBIT, player);
-                                transactionDataBase.addTransaction(transaction);
-                            }
-                            has_transaction_uid = false;
+                            playerDataBase.updateBalancePlayer(player.getPlayer_id(), balanceAfterDebit);
+                            transactionDataBase.addTransaction(new Transaction(transaction_uid, amount, TypeOperation.DEBIT, player));
+                            hasTransactionID = false;
                         }
-                    }while (has_transaction_uid);
+                    }while (hasTransactionID);
                 }else {
                     System.out.println("ОШИБКА: Недостаточно денег для снятия. Ваш остаток на счёте = " + player.getBalance() + ", попробуйте ещё раз!");
                     getInputAmountDebit(player);
@@ -101,7 +112,10 @@ public class LogicServiceLoginPlayer {
             }
 
         }catch (InputMismatchException e){
-            System.out.println("Ввод только чисел, в качестве разделителя вещественного числа - запятая. Попробуйте ещё");
+            System.out.println("Ввод только чисел, в качестве разделителя вещественного числа - точка. Попробуйте ещё");
+            isSuccessful = getInputAmountDebit(player);
+        }catch (NumberFormatException e){
+            System.out.println("Не верный формат ввода значения debit суммы, попробуйте ещё раз!");
             isSuccessful = getInputAmountDebit(player);
         }
 
@@ -114,7 +128,7 @@ public class LogicServiceLoginPlayer {
 
         for (Transaction transaction : transactions){
             System.out.println("Сумма транзакции: " + transaction.getAmount()
-                    + " бел.руб, тип транзакции: " + transaction.getTypeOperation()
+                    + " бел.руб, тип транзакции: " + transaction.getType_operation()
                     + ", время: " + dateFormat.format(transaction.getDate()));
         }
     }
