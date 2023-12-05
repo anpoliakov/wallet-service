@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <changeSet id="create-table-operations" author="anpoliakov">
+        <createTable tableName="operations" schemaName="entities">
+            <column name="operation_id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="name_operation" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- ИНИЦИАЛИЗАЦИЯ поля operation_id через sequence! не autoIncrement! -->
+        <createSequence sequenceName="sequence_operation_id" startValue="1" incrementBy="1" schemaName="entities"/>
+        <addDefaultValue tableName="operations" schemaName="entities" columnName="operation_id" columnDataType="BIGINT" defaultValueSequenceNext="sequence_operation_id"/>
+
+    </changeSet>
+
+</databaseChangeLog>

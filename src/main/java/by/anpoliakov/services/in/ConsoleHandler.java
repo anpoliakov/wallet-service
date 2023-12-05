@@ -2,7 +2,7 @@ package by.anpoliakov.services.in;
 
 import by.anpoliakov.domain.Player;
 import by.anpoliakov.domainServices.PlayerRepository;
-import by.anpoliakov.infrastructure.ApplicationDataBase;
+import by.anpoliakov.infrastructure.PlayerDataBase;
 
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -11,10 +11,10 @@ import java.util.Scanner;
  * Класс для работы с пользовательским вводом в консоль
  * Основное меню, меню регистрации и авторизации - когда пользователь ещё не в системе! */
 public class ConsoleHandler {
-    PlayerRepository dataBasePlayer = null;
+    private PlayerRepository playerRepository = null;
 
     public ConsoleHandler() {
-        this.dataBasePlayer = ApplicationDataBase.getInstance();
+        playerRepository = new PlayerDataBase();
     }
 
     /** Основное меню программы */
@@ -55,9 +55,9 @@ public class ConsoleHandler {
                 return;
             }
 
-        Player player = dataBasePlayer.getPlayerByLoginAndPassword(login, password);
+        Player player = playerRepository.getPlayerByLoginAndPassword(login, password);
         if(player != null){
-            new LoginConsoleHandlerForPlayer(player);
+            new ConsoleHandlerForLoginPlayer(player);
         }else {
             System.out.println("Данный пользователь не найден! Попробуйте ещё раз!");
             showLoginMenu();
@@ -83,8 +83,8 @@ public class ConsoleHandler {
             return;
         }
 
-        if(!dataBasePlayer.existPlayerByLogin(login)){
-            dataBasePlayer.add(new Player(login, password));
+        if(!playerRepository.existPlayerByLogin(login)){
+            playerRepository.addPlayer(new Player(login, password));
             System.out.println("Вы успешно зарегистрированы! Можете войти под своей учётной записью.");
         }else {
             System.out.println("Пользователь " + login + " уже существует! Попробуйте ещё раз");
@@ -102,8 +102,11 @@ public class ConsoleHandler {
         int choice = -1;
 
         try {
-            choice = scanner.nextInt();
-            scanner.nextLine();
+            if (scanner.hasNextLine()) {
+                choice = scanner.nextInt();
+                scanner.nextLine();
+                System.out.println("Был ввод-"+choice);
+            }
         }catch (NoSuchElementException e){
             choice = -1;
         }

@@ -1,5 +1,6 @@
 package by.anpoliakov.domainServices;
 
+import by.anpoliakov.domain.Player;
 import by.anpoliakov.domain.Transaction;
 
 import java.util.List;
@@ -7,7 +8,7 @@ import java.util.List;
 /** интерфейс с описанием действий над сущностью
  * @see Transaction */
 public interface TransactionRepository {
-    List <Transaction> getTransactionsByListID(List<String> listID);
-    void addTransaction (String idTransaction, Transaction transaction);
+    List <Transaction> getTransactionsPlayer(Player player);
+    void addTransaction (Transaction transaction);
     boolean checkUniqueTransactionById(String id);
 }
